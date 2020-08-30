@@ -1,0 +1,36 @@
+### sudo docker run --detach -p 8880:8880 --name=karaoke-forever-server -v /MNT-TO-DB-FILE/database.sqlite3:/usr/local/lib/node_modules/karaoke-forever/database.sqlite3 -v /MNT-TO-KARAOKE-FILES/FILES:/mnt/KARAOKE_FILES karaoke-forever-server ##
+### default db path === /usr/local/lib/node_modules/karaoke-forever/database.sqlite3 ##
+
+FROM node:lts
+
+LABEL MAINTAINER="Ralph Jackson"
+LABEL description="Karaoke Forever NODE Server"
+
+ARG CURRENT_VERSION="0.8.0"
+ARG VERSION=${CURRENT_VERSION}
+
+### INSTALL CRON FOR SCANNING ##
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    cron && rm -rf /var/lib/apt/lists/*
+
+### MAKE CRON FILE ##
+RUN touch /etc/cron.d/kf-scanner-cron && \
+    chmod 0744 /etc/cron.d/kf-scanner-cron && \
+    echo "### KARAOKE FOREVER SCANNER ONLY MODE ##" > /etc/cron.d/kf-scanner-cron && \
+    echo "42 03,07,11,15,21 * * * karaoke-forever-server scanonly > 2>&1" >> /etc/cron.d/kf-scanner-cron && \
+    echo "### END KARAOKE FOREVER SCANNER ONLY MODE ##" >> /etc/cron.d/kf-scanner-cron && \
+    crontab /etc/cron.d/kf-scanner-cron && service cron start
+
+### MAKE MOUNT DIR FOR VOLUME MOUNT ##
+RUN mkdir /mnt/KARAOKE_FILES && chmod 0777 /mnt/KARAOKE_FILES
+
+### INSTALL KARAOKE FORVER SERVER NPM ##
+RUN npm -g config set user root \
+    #&& npm -g install karaoke-forever@${VERSION}
+    && npm -g install karaoke-forever@next
+
+### RUN CRON AND KARAOKE-FOREVER SERVER AT STARTUP ##
+CMD [ "karaoke-forever-server", "--port", "8880" ]
+
+### MAKE SURE PORT OPEN ON CONTAINER ##
+EXPOSE 8880

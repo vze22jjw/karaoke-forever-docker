@@ -1,5 +1,8 @@
 # karaoke-forever-docker
-docker container for karaoke-forever software
+docker container for karaoke-forever software:
+
+    https://www.karaoke-forever.com/
+
 docker-ce is needed to build and run
 after running bash script can run like below, with mount points to a db file that will persist through docker runs and your karaoke music files
 

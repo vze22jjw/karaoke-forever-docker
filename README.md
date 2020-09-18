@@ -16,6 +16,7 @@ default db path === /usr/local/lib/node_modules/karaoke-forever/database.sqlite3
 
 
 Initial Run without persistant DB:
+
 This will not retain any data. You will need to create users, stars and scan music files again.  This is a good starting point to get the db file populated for above persisant future runs.
 
 sudo docker run --detach -p 8880:8880 --name=karaoke-forever-server -v /MNT-TO-KARAOKE-FILES/FILES:/mnt/KARAOKE_FILES karaoke-forever-server

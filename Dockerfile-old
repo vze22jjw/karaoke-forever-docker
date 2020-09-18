@@ -21,7 +21,7 @@ RUN mkdir /mnt/KARAOKE_FILES && chmod 0777 /mnt/KARAOKE_FILES
 
 ### INSTALL KARAOKE FORVER SERVER NPM ##
 RUN npm -g config set user root \
-    #&& npm -g install karaoke-forever@${VERSION}
+    && npm -g install karaoke-forever@${VERSION}
 
 ### RUN THIS ON CONTAINER START
 CMD [ "karaoke-forever-server", "--port", "$PORT" ]

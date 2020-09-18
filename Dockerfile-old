@@ -7,13 +7,24 @@ LABEL MAINTAINER="Ralph Jackson"
 LABEL description="Karaoke Forever Node Server"
 
 ARG CURRENT_VERSION="0.8.0"
+ARG PORT="8880"
 ARG VERSION=${CURRENT_VERSION}
 
-RUN mkdir /mnt/KARAOKE_FILES && chmod 0777 /mnt/KARAOKE_FILES \
-    && npm -g config set user root \
-    && npm -g install karaoke-forever@${VERSION}
-    #&& npm -g install karaoke-forever@next
+### SET TIMEZONE HERE
+ENV TZ=America/New_York
 
-CMD [ "karaoke-forever-server", "--port", "8880" ]
+### CHANGE TIME ZONE ##
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-EXPOSE 8880
+### MAKE MOUNT DIR FOR VOLUME MOUNT ##
+RUN mkdir /mnt/KARAOKE_FILES && chmod 0777 /mnt/KARAOKE_FILES
+
+### INSTALL KARAOKE FORVER SERVER NPM ##
+RUN npm -g config set user root \
+    #&& npm -g install karaoke-forever@${VERSION}
+
+### RUN THIS ON CONTAINER START
+CMD [ "karaoke-forever-server", "--port", "$PORT" ]
+
+### MAKE SURE PORT OPEN ON CONTAINER ##
+EXPOSE $PORT

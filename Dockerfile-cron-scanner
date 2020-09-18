@@ -6,6 +6,10 @@ FROM node:lts
 LABEL MAINTAINER="Ralph Jackson"
 LABEL description="Karaoke Forever NODE Server"
 
+### SET TIMEZONE HERE
+ENV TZ=America/New_York
+
+ARG PORT="8880"
 ARG CURRENT_VERSION="0.8.0"
 ARG VERSION=${CURRENT_VERSION}
 
@@ -13,11 +17,16 @@ ARG VERSION=${CURRENT_VERSION}
 RUN apt-get update && apt-get install -y --no-install-recommends \
     cron && rm -rf /var/lib/apt/lists/*
 
+### CHANGE TIME ZONE ##
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+
 ### MAKE CRON FILE ##
 RUN touch /etc/cron.d/kf-scanner-cron && \
     chmod 0744 /etc/cron.d/kf-scanner-cron && \
     echo "### KARAOKE FOREVER SCANNER ONLY MODE ##" > /etc/cron.d/kf-scanner-cron && \
-    echo "42 03,07,11,15,21 * * * karaoke-forever-server scanonly > 2>&1" >> /etc/cron.d/kf-scanner-cron && \
+    echo "### TESTING ONLY MODE ##" >> /etc/cron.d/kf-scanner-cron && \
+    echo "45 * * * * echo 'DB SCANNER CRON BEGIN HERE...' > /dev/stdout && karaoke-forever-server scanonly > /dev/stdout" >> /etc/cron.d/kf-scanner-cron && \
+    echo "#42 03,07,11,15 * * * karaoke-forever-server scanonly > /dev/stdout" >> /etc/cron.d/kf-scanner-cron && \
     echo "### END KARAOKE FOREVER SCANNER ONLY MODE ##" >> /etc/cron.d/kf-scanner-cron && \
     crontab /etc/cron.d/kf-scanner-cron && service cron start
 
@@ -30,7 +39,7 @@ RUN npm -g config set user root \
     && npm -g install karaoke-forever@next
 
 ### RUN CRON AND KARAOKE-FOREVER SERVER AT STARTUP ##
-CMD [ "karaoke-forever-server", "--port", "8880" ]
+CMD [ "karaoke-forever-server", "--port", "$PORT" ]
 
 ### MAKE SURE PORT OPEN ON CONTAINER ##
-EXPOSE 8880
+EXPOSE $PORT

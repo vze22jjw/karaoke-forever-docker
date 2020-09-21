@@ -1,13 +1,14 @@
 #!/bin/bash
 ### CRON TO LOGIN AND RUN A SCAN
 ### DATA FORMATS
-#DATA="{"username":"kadmin","password":"kadmin-1603","roomId":"11"}"
-#DATA='"{\"username\":\"kadmin\",\"password\":\"kadmin-1603\",\"roomId\":\"11\"}"'
+#DATA="{"username":"","password":"","roomId":"11"}"
+#DATA='"{\"username\":\"\",\"password\":\"\",\"roomId\":\"11\"}"'
 
-LOGIN_URL="http://ackshunjackson.duckdns.org:8880/api/login"
-SCAN_URL="http://ackshunjackson.duckdns.org:8880/api/prefs/scan"
-USERNAME="kadmin"
-PASSWORD="kadmin-1603"
+### ADD YOUR OWN VALUES TO SCRIPT HERE
+LOGIN_URL="http://URL/api/login"
+SCAN_URL="http://URL/api/prefs/scan"
+USERNAME=""
+PASSWORD=""
 ROOMID="1"
 TOKEN_NAME="kfToken"
 TMP_COOKIES="/tmp/karaoke-cookies.txt"

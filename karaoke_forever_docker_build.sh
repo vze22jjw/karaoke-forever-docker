@@ -19,11 +19,13 @@ echo "INSTALLED VERSION WILL BE $VERSION. IMAGES NOT USED WILL BE CLEANED STARTI
 
 ### IF LATEST VERSION DON'T CREATE TWO TAGS
 if [ "$VESRION" == "latest" ]; then
-    docker build -f /volume1/VOLUME1/DATA_BACKUP/DOCKER_BUILDS/karaoke-forever-docker/Dockerfile . \
+    docker build -f /volume1/VOLUME1/DATA_BACKUP/DOCKER_BUILDS/karaoke-forever-docker/Dockerfile \
+    /volume1/VOLUME1/DATA_BACKUP/DOCKER_BUILDS/karaoke-forever-docker/ \
     --build-arg CURRENT_VERSION=$VERSION --build-arg PORT=$PORT -t "$DOCKER_IMAGE_NAME":latest
 else
     ### MAKE A LATEST TAG AS WELL AS VERSION TAG
-    docker build -f /volume1/VOLUME1/DATA_BACKUP/DOCKER_BUILDS/karaoke-forever-docker/Dockerfile . \
+    docker build -f /volume1/VOLUME1/DATA_BACKUP/DOCKER_BUILDS/karaoke-forever-docker/Dockerfile \
+    /volume1/VOLUME1/DATA_BACKUP/DOCKER_BUILDS/karaoke-forever-docker/ \
     --build-arg CURRENT_VERSION=$VERSION --build-arg PORT=$PORT \
     -t "$DOCKER_IMAGE_NAME":latest -t "$DOCKER_IMAGE_NAME":"$VERSION"
 fi

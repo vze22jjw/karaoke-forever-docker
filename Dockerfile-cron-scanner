@@ -10,36 +10,40 @@ LABEL description="Karaoke Forever NODE Server"
 ENV TZ=America/New_York
 
 ARG PORT="8880"
+ENV RUN_PORT ${PORT}
+
 ARG CURRENT_VERSION="0.8.0"
 ARG VERSION=${CURRENT_VERSION}
 
-### INSTALL CRON FOR SCANNING ##
+### INSTALL CURL, CRON FOR SCANNING ##
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    cron && rm -rf /var/lib/apt/lists/*
+    supervisor \
+    cron && \
+    rm -rf /var/lib/apt/lists/*
 
 ### CHANGE TIME ZONE ##
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
-### MAKE CRON FILE ##
-RUN touch /etc/cron.d/kf-scanner-cron && \
-    chmod 0744 /etc/cron.d/kf-scanner-cron && \
-    echo "### KARAOKE FOREVER SCANNER ONLY MODE ##" > /etc/cron.d/kf-scanner-cron && \
-    echo "### TESTING ONLY MODE ##" >> /etc/cron.d/kf-scanner-cron && \
-    echo "45 * * * * echo 'DB SCANNER CRON BEGIN HERE...' > /dev/stdout && karaoke-forever-server scanonly > /dev/stdout" >> /etc/cron.d/kf-scanner-cron && \
-    echo "#42 03,07,11,15 * * * karaoke-forever-server scanonly > /dev/stdout" >> /etc/cron.d/kf-scanner-cron && \
-    echo "### END KARAOKE FOREVER SCANNER ONLY MODE ##" >> /etc/cron.d/kf-scanner-cron && \
-    crontab /etc/cron.d/kf-scanner-cron && service cron start
-
 ### MAKE MOUNT DIR FOR VOLUME MOUNT ##
-RUN mkdir /mnt/KARAOKE_FILES && chmod 0777 /mnt/KARAOKE_FILES
+RUN mkdir -p /mnt/KARAOKE_FILES /etc/supervisor/conf.d \ 
+    && chmod 0777 /mnt/KARAOKE_FILES
+
+### MAKE CRON AND SUPERVISOR CONF FILES ##
+COPY scan_cron.sh /root/scan_cron.sh
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+RUN touch /etc/cron.d/kf-scanner-cron && \
+    chmod 0744 /root/scan_cron.sh && chmod 0744 /etc/cron.d/kf-scanner-cron && \
+    echo "42 03,15 * * * /root/scan_cron.sh >> /dev/stdout" > /etc/cron.d/kf-scanner-cron && \
+    crontab /etc/cron.d/kf-scanner-cron && sed -i "s/RUUUN_POOORT/${RUN_PORT}/g" /etc/supervisor/conf.d/supervisord.conf
 
 ### INSTALL KARAOKE FORVER SERVER NPM ##
 RUN npm -g config set user root \
     #&& npm -g install karaoke-forever@${VERSION}
     && npm -g install karaoke-forever@next
 
-### RUN CRON AND KARAOKE-FOREVER SERVER AT STARTUP ##
-CMD [ "karaoke-forever-server", "--port", "$PORT" ]
+### KARAOKE-FOREVER SERVER AT STARTUP ##
+CMD /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
 
-### MAKE SURE PORT OPEN ON CONTAINER ##
+### MAKE SURE PORT IS OPEN ON CONTAINER ##
 EXPOSE $PORT

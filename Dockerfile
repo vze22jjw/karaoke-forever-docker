@@ -6,8 +6,10 @@ FROM node:lts
 LABEL MAINTAINER="Ralph Jackson"
 LABEL description="Karaoke Forever Node Server"
 
-ARG CURRENT_VERSION="0.8.0"
 ARG PORT="8880"
+ENV RUN_PORT ${PORT}
+
+ARG CURRENT_VERSION="0.8.0"
 ARG VERSION=${CURRENT_VERSION}
 
 ### SET TIMEZONE HERE
@@ -23,8 +25,8 @@ RUN mkdir /mnt/KARAOKE_FILES && chmod 0777 /mnt/KARAOKE_FILES
 RUN npm -g config set user root \
     && npm -g install karaoke-forever@${VERSION}
 
-### RUN THIS ON CONTAINER START
-CMD [ "karaoke-forever-server", "--port", "$PORT" ]
+### KARAOKE-FOREVER SERVER AT STARTUP ##
+CMD [ "sh", "-c", "karaoke-forever-server --port $RUN_PORT" ]
 
-### MAKE SURE PORT OPEN ON CONTAINER ##
+### MAKE SURE PORT IS OPEN ON CONTAINER ##
 EXPOSE $PORT
